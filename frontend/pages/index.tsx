@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react'
+import Head from 'next/head'
 const API_BASE = process.env.NEXT_PUBLIC_API_BASE ?? "http://localhost:8000";
 
 type FileExtraction = {
@@ -79,6 +80,7 @@ export default function Home() {
 
   return (
     <main style={{ maxWidth: 980, margin: '40px auto', padding: 16 }}>
+      <Head><title>マイソクPDF自動リネーム（MVP）</title></Head>
       <h1>マイソクPDF自動リネーム（MVP）</h1>
       <p>PDFをドラッグ＆ドロップしてアップロードし、命名候補を確認のうえZIPで一括ダウンロードします。</p>
 
