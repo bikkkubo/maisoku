@@ -28,6 +28,13 @@ def _extract_text_from_pdf(pdf_path: str, dpi: int = 300) -> str:
     text = text.translate(KANJI_NUM)
     return text
 
+def _extract_text_from_image_path(img_path: str) -> str:
+    img = Image.open(img_path)
+    txt1 = pytesseract.image_to_string(img, lang='jpn')
+    txt2 = pytesseract.image_to_string(img, lang='jpn_vert')
+    text = (txt1 + "\n" + txt2).translate(KANJI_NUM)
+    return text
+
 def _find_tokens_count(text: str, tokens: List[str]) -> int:
     n = 0
     for t in tokens:
@@ -103,6 +110,66 @@ def detect_area_sqm(text: str) -> Optional[float]:
 
 def extract_from_pdf(pdf_path: str):
     text = _extract_text_from_pdf(pdf_path)
+    # Classify
+    rent_hits = _find_tokens_count(text, RENT_TOKENS)
+    sale_hits = _find_tokens_count(text, SALE_TOKENS)
+    detected_type = "rent" if rent_hits >= sale_hits else "sale" if sale_hits > 0 else "unknown"
+
+    # Fields
+    pname = detect_property_name(text)
+    room = detect_room_label(text)
+    area = detect_area_sqm(text)
+
+    # Prices
+    rents = _find_prices_yen(text, RENT_TOKENS)
+    sales = _find_prices_yen(text, SALE_TOKENS)
+
+    rent_values = []
+    tax_mode_hint = "不明"
+    if rents:
+        for (yen, s, e) in rents:
+            hint = _is_tax_ex(text, (s, e))
+            yen_adj = _adjust_tax(yen, hint)
+            rent_values.append(yen_adj)
+            if hint == "税込":
+                tax_mode_hint = "税込"
+            elif hint == "税別":
+                tax_mode_hint = "税別"
+    sale_price = None
+    if sales:
+        # take first sale price as canonical
+        (yen, s, e) = sales[0]
+        hint = _is_tax_ex(text, (s, e))
+        sale_price = _adjust_tax(yen, hint)
+        if hint == "税込":
+            tax_mode_hint = "税込"
+        elif hint == "税別":
+            tax_mode_hint = "税別"
+
+    return {
+        "text": text,
+        "detected_type": detected_type,
+        "property_name": pname,
+        "room_label": room,
+        "area_sqm": area,
+        "rent_values_yen": sorted(set(rent_values)) if rent_values else None,
+        "sale_price_yen": sale_price,
+        "tax_mode": tax_mode_hint,
+    }
+
+def extract_from_path(file_path: str):
+    lower = file_path.lower()
+    if lower.endswith(".pdf"):
+        text = _extract_text_from_pdf(file_path)
+    elif lower.endswith((".png", ".jpg", ".jpeg", ".webp")):
+        text = _extract_text_from_image_path(file_path)
+    else:
+        # fallback: try image first then pdf
+        try:
+            text = _extract_text_from_image_path(file_path)
+        except Exception:
+            text = _extract_text_from_pdf(file_path)
+
     # Classify
     rent_hits = _find_tokens_count(text, RENT_TOKENS)
     sale_hits = _find_tokens_count(text, SALE_TOKENS)

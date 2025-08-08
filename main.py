@@ -7,7 +7,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import FileResponse
 from pydantic import BaseModel
 from models import JobStatus, FileExtraction, Overrides
-from ocr_extractor import extract_from_pdf
+from ocr_extractor import extract_from_path
 from naming import build_filename_rent_single, build_filename_rent_range, build_filename_sale
 from utils import ensure_dir, cleanup_old_jobs, zip_dir, copy_with_name
 
@@ -55,13 +55,14 @@ async def upload(files: List[UploadFile] = File(...)):
 
     recs: List[FileExtraction] = []
     for f in files:
-        if not f.filename.lower().endswith(".pdf"):
-            raise HTTPException(400, detail="PDFのみアップロードしてください")
+        lower = f.filename.lower()
+        if not lower.endswith((".pdf", ".png", ".jpg", ".jpeg", ".webp")):
+            raise HTTPException(400, detail="PDFまたは画像（png/jpg/webp）のみアップロードしてください")
         dst = os.path.join(job_dir, os.path.basename(f.filename))
         with open(dst, "wb") as w:
             w.write(await f.read())
-        # OCR & Extract
-        data = extract_from_pdf(dst)
+        # OCR & Extract (PDF/画像 両対応)
+        data = extract_from_path(dst)
         rec = FileExtraction(
             src_filename=os.path.basename(f.filename),
             detected_type=data["detected_type"],

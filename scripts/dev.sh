@@ -37,6 +37,24 @@ pip3 install -r "$REQ_FILE"
 (lsof -ti:8000 | xargs kill -9) >/dev/null 2>&1 || true
 nohup uvicorn main:app --host 0.0.0.0 --port 8000 > "$ROOT/backend_dev.log" 2>&1 &
 
+## --- Tesseract env autodetect (macOS/Homebrew friendly) ---
+if command -v tesseract >/dev/null 2>&1; then
+  export TESSERACT_CMD="$(command -v tesseract)"
+fi
+if [ -z "${TESSDATA_PREFIX:-}" ]; then
+  if command -v brew >/dev/null 2>&1; then
+    TP="$(brew --prefix tesseract 2>/dev/null)/share/tessdata"
+    if [ -d "$TP" ]; then export TESSDATA_PREFIX="$TP"; fi
+  fi
+  for TP in /opt/homebrew/share/tessdata /usr/local/share/tessdata; do
+    if [ -z "${TESSDATA_PREFIX:-}" ] && [ -d "$TP" ]; then
+      export TESSDATA_PREFIX="$TP"
+      break
+    fi
+  done
+fi
+echo "[dev.sh] Tesseract: ${TESSERACT_CMD:-unset} | TESSDATA_PREFIX=${TESSDATA_PREFIX:-unset}" >> "$ROOT/backend_dev.log"
+
 # Frontend up
 FRONT_PORT="${FRONT_PORT:-3030}"
 cd "$ROOT/frontend"

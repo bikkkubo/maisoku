@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react'
 import Head from 'next/head'
+// NOTE: 環境変数でAPIベースURLを制御（既定: localhost:8000）
 const API_BASE = process.env.NEXT_PUBLIC_API_BASE ?? "http://localhost:8000";
 
 type FileExtraction = {
@@ -32,13 +33,29 @@ export default function Home() {
     setLoading(true)
     const form = new FormData()
     Array.from(files).forEach(f => form.append('files', f))
-    const res = await fetch(`${API_BASE}/api/upload`, {
-      method: 'POST',
-      body: form,
-    })
-    const data = await res.json()
-    setJob(data)
-    setLoading(false)
+    try {
+      const res = await fetch(`${API_BASE}/api/upload`, {
+        method: 'POST',
+        body: form,
+      })
+      if (!res.ok) {
+        let msg = `アップロード失敗 (HTTP ${res.status})`
+        try {
+          const err = await res.json()
+          if (err?.detail) msg = Array.isArray(err.detail) ? err.detail.map((d:any)=>d.msg||d).join(', ') : err.detail
+          else if (err?.message) msg = err.message
+        } catch {}
+        alert(msg)
+        setLoading(false)
+        return
+      }
+      const data = await res.json()
+      setJob(data)
+    } catch (e: any) {
+      alert(`アップロード時に通信エラーが発生しました: ${e?.message || e}`)
+    } finally {
+      setLoading(false)
+    }
   }
 
   const overrideItem = (index: number, patch: Partial<FileExtraction>) => {
@@ -87,7 +104,7 @@ export default function Home() {
       <div style={{ border: '1px dashed #ccc', padding: 24, borderRadius: 8, margin: '16px 0' }}>
         <input
           type="file"
-          accept="application/pdf"
+          accept="application/pdf,image/*"
           multiple
           onChange={(e) => setFiles(e.target.files)}
         />
