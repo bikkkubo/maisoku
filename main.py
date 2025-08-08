@@ -3,6 +3,7 @@ import uuid
 import json
 from typing import List, Optional
 from fastapi import FastAPI, UploadFile, File, HTTPException
+from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import FileResponse
 from pydantic import BaseModel
 from models import JobStatus, FileExtraction, Overrides
@@ -13,6 +14,15 @@ from utils import ensure_dir, cleanup_old_jobs, zip_dir, copy_with_name
 JOBS_ROOT = os.environ.get("JOBS_ROOT", "/tmp/mysoku_jobs")
 
 app = FastAPI(title="Mysoku Renamer API", version="0.1.0")
+
+# CORS for local frontend
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["http://localhost:3000"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
 # In-memory job registry (MVP)
 JOBS: dict[str, JobStatus] = {}

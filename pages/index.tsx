@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react'
+const API_BASE = process.env.NEXT_PUBLIC_API_BASE ?? "http://localhost:8000";
 
 type FileExtraction = {
   src_filename: string
@@ -30,7 +31,7 @@ export default function Home() {
     setLoading(true)
     const form = new FormData()
     Array.from(files).forEach(f => form.append('files', f))
-    const res = await fetch('http://localhost:8000/api/upload', {
+    const res = await fetch(`${API_BASE}/api/upload`, {
       method: 'POST',
       body: form,
     })
@@ -59,7 +60,7 @@ export default function Home() {
         rent_values_yen: f.rent_values_yen,
       }))
     }
-    const res = await fetch(`http://localhost:8000/api/job/${job.job_id}/override`, {
+    const res = await fetch(`${API_BASE}/api/job/${job.job_id}/override`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(body)
@@ -70,10 +71,10 @@ export default function Home() {
 
   const finalize = async () => {
     if (!job) return
-    const res = await fetch(`http://localhost:8000/api/job/${job.job_id}/finalize`, { method: 'POST' })
+    const res = await fetch(`${API_BASE}/api/job/${job.job_id}/finalize`, { method: 'POST' })
     const data = await res.json()
     // trigger download
-    window.location.href = `http://localhost:8000${data.download_url}`
+    window.location.href = `${API_BASE}${data.download_url}`
   }
 
   return (
