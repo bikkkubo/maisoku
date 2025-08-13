@@ -1,0 +1,35 @@
+[build-system]
+requires = ["setuptools>=69", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "mysoku-renamer"
+version = "0.1.0"
+description = "Rename Japanese real-estate 'mysoku' PDFs by extracting key fields"
+readme = "README.md"
+requires-python = ">=3.9"
+dependencies = [
+  "pypdf>=4.2.0",
+  "regex>=2024.5.15"
+]
+
+[project.optional-dependencies]
+test = [
+  "pytest>=7.0.0",
+  "reportlab>=4.0.0"
+]
+dev = [
+  "pytest>=7.0.0",
+  "reportlab>=4.0.0",
+  "ruff>=0.1.0",
+  "mypy>=1.0.0"
+]
+
+[project.scripts]
+mysoku-rename = "mysoku_renamer.cli:main"
+
+[tool.setuptools]
+package-dir = {"" = "src"}
+
+[tool.setuptools.packages.find]
+where = ["src"]
