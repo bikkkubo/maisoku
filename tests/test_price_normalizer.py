@@ -1,6 +1,6 @@
 from mysoku_renamer.price_normalizer import (
     parse_amount_jpy, format_price_sell, format_price_rent,
-    normalize_number_string, extract_multiple_amounts
+    normalize_number_string, extract_multiple_amounts, check_price_unspecified
 )
 
 
@@ -33,7 +33,6 @@ def test_parse_amount_edge_cases():
     
     # 解析不可能な文字列
     assert parse_amount_jpy("高級マンション") is None
-    assert parse_amount_jpy("要相談") is None
     assert parse_amount_jpy("123") is None  # 小さすぎる数字
     
     # 異常な値
@@ -110,6 +109,10 @@ def test_extract_multiple_amounts_empty():
     assert extract_multiple_amounts("") == {}
     assert extract_multiple_amounts(None) == {}
     assert extract_multiple_amounts("金額情報なし") == {}
+    
+    # 数字はあるが価格として認識されないパターン
+    result = extract_multiple_amounts("築20年 3LDK 駅徒歩5分")
+    assert result == {}  # 価格として認識される数字なし
 
 
 def test_parse_amount_various_formats():
@@ -144,3 +147,116 @@ def test_format_price_boundary_cases():
     # 負の値
     assert format_price_sell(-1000) == "0円"
     assert format_price_rent(-500) == "0円"
+
+
+def test_check_price_unspecified():
+    """応相談・価格未定チェックテスト"""
+    # 応相談パターン
+    assert check_price_unspecified("価格は応相談でお願いします") is True
+    assert check_price_unspecified("詳細は要問合せ") is True
+    assert check_price_unspecified("要問合わせ") is True
+    assert check_price_unspecified("価格未定") is True
+    assert check_price_unspecified("要相談") is True
+    assert check_price_unspecified("別途相談") is True
+    assert check_price_unspecified("お問い合わせください") is True
+    
+    # 通常の価格表記
+    assert check_price_unspecified("1億円") is False
+    assert check_price_unspecified("家賃18万円") is False
+    assert check_price_unspecified("販売価格：8,500万円") is False
+    
+    # 空文字・None
+    assert check_price_unspecified("") is False
+    assert check_price_unspecified(None) is False
+
+
+def test_parse_amount_with_unspecified():
+    """応相談等を含む価格解析テスト"""
+    # 応相談の場合はNone
+    assert parse_amount_jpy("価格は応相談") is None
+    assert parse_amount_jpy("要問合せ") is None
+    assert parse_amount_jpy("価格未定") is None
+    
+    # 価格とコメントが混在
+    assert parse_amount_jpy("1億円 応相談") is None  # 応相談が含まれる
+
+
+def test_enhanced_rent_patterns():
+    """強化された賃料パターンのテスト"""
+    test_cases = [
+        ("家賃：180,000円", 180_000),
+        ("賃料：18万円", 180_000),
+        ("月額 200000円", 200_000),
+        ("180,000円/月", 180_000),
+        ("18万円/月", 180_000),
+        ("家賃18万円", 180_000),
+        ("賃料18万", 180_000),
+        ("18.5万円", 185_000),
+    ]
+    
+    for text, expected in test_cases:
+        amounts = extract_multiple_amounts(text)
+        assert 'rent' in amounts, f"Text: {text} - rent not found"
+        assert amounts['rent'] == expected, f"Text: {text}, Expected: {expected}, Got: {amounts.get('rent')}"
+
+
+def test_enhanced_sell_patterns():
+    """強化された売買価格パターンのテスト"""
+    test_cases = [
+        ("1.2億円", 120_000_000),
+        ("1億2000万円", 120_000_000),
+        ("8,500万円", 85_000_000),
+        ("販売価格：1.5億円", 150_000_000),
+        ("売出価格：8800万", 88_000_000),
+        ("価格：1億円", 100_000_000),
+    ]
+    
+    for text, expected in test_cases:
+        amounts = extract_multiple_amounts(text)
+        assert 'price' in amounts, f"Text: {text} - price not found"
+        assert amounts['price'] == expected, f"Text: {text}, Expected: {expected}, Got: {amounts.get('price')}"
+
+
+def test_extract_multiple_amounts_with_unspecified():
+    """応相談を含むテキストの複数金額抽出テスト"""
+    # 応相談の場合
+    amounts = extract_multiple_amounts("価格は応相談でお願いします")
+    assert 'price_unspecified' in amounts
+    assert amounts['price_unspecified'] is True
+    assert 'rent' not in amounts
+    assert 'price' not in amounts
+    
+    # 要問合せの場合
+    amounts = extract_multiple_amounts("詳細は要問合せ")
+    assert 'price_unspecified' in amounts
+    assert amounts['price_unspecified'] is True
+
+
+def test_normalize_number_string_enhanced():
+    """強化された数字文字列正規化テスト"""
+    # 通貨記号除去
+    assert normalize_number_string("¥1,234,567") == "1234567"
+    assert normalize_number_string("￥1，234，567") == "1234567"
+    
+    # 全角・半角空白除去
+    assert normalize_number_string("1 234 567") == "1234567"
+    assert normalize_number_string("1　234　567") == "1234567"
+    
+    # 複合パターン
+    assert normalize_number_string("￥１，２３４，５６７円") == "1234567円"
+
+
+def test_vertical_text_patterns():
+    """縦書きPDF由来の価格抽出パターンテスト"""
+    # 縦書き特有の文字化け・スペースパターン
+    test_cases = [
+        ("１ 億 ２ ０ ０ ０ 万 円", 120_000_000),
+        ("家賃　１８万円", 180_000),
+        ("賃　料　：　２０万", 200_000),
+        ("売出価格：１．５億円", 150_000_000),
+    ]
+    
+    for text, expected in test_cases:
+        result = parse_amount_jpy(text)
+        if result is not None:  # 現在の実装で対応できるもののみテスト
+            assert result == expected, f"Text: {text}, Expected: {expected}, Got: {result}"

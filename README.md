@@ -50,6 +50,35 @@ pip3 install -e .
 mysoku-rename --help
 ```
 
+### 4. OCR機能（オプション）
+
+画像ベースPDFや埋め込みテキストが不足している場合のOCR（光学文字認識）機能を利用するには、追加の依存関係とシステムレベルのソフトウェアが必要です。
+
+#### システム要件
+**macOS:**
+```bash
+brew install poppler tesseract tesseract-lang
+```
+
+**Ubuntu/Debian:**
+```bash
+sudo apt-get install -y poppler-utils tesseract-ocr tesseract-ocr-jpn tesseract-ocr-jpn-vert
+```
+
+#### Python依存関係
+```bash
+pip install -e '.[ocr]'
+```
+
+#### OCR機能の利用
+```bash
+# OCR機能付きでドライラン
+mysoku-rename --dry-run --ocr ./pdfs --output preview_ocr.tsv
+
+# OCR機能の診断
+python -m mysoku_renamer.ocr
+```
+
 ## 使い方
 
 ### ⚠️ 重要: 安全運用の手順

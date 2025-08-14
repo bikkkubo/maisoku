@@ -39,7 +39,7 @@ def extract_text_embedded(pdf_path: Path) -> str:
     return "\n".join(parts)
 
 
-def analyze_pdf(pdf_path: Path, ocr_threshold: int = 200, allow_ocr: bool = False) -> ExtractResult:
+def analyze_pdf(pdf_path: Path, ocr_threshold: int = 200, allow_ocr: bool = False, ocr_config: Optional[dict] = None) -> ExtractResult:
     """
     Analyze a PDF: get embedded text and optionally perform OCR fallback.
     
@@ -55,6 +55,7 @@ def analyze_pdf(pdf_path: Path, ocr_threshold: int = 200, allow_ocr: bool = Fals
         pdf_path: Path to PDF file
         ocr_threshold: Text length below which OCR is flagged as needed
         allow_ocr: Enable OCR fallback when text is scarce (default: False)
+        ocr_config: OCR configuration dictionary (default: None)
         
     Returns:
         ExtractResult with text, length, OCR flag, and processing note
@@ -66,10 +67,14 @@ def analyze_pdf(pdf_path: Path, ocr_threshold: int = 200, allow_ocr: bool = Fals
         raise ValueError(f"Not a PDF file: {pdf_path}")
     
     try:
+        # OCR設定のデフォルト値と取得
+        config = ocr_config or {}
+        actual_threshold = config.get('threshold', ocr_threshold)
+        
         # Step 1: Extract embedded text
         text = extract_text_embedded(pdf_path)
         length = len(text.strip())  # Use stripped length for better OCR threshold detection
-        needs_ocr = length < ocr_threshold
+        needs_ocr = length < actual_threshold
         
         # Initial notes based on embedded text
         if length == 0:
@@ -81,18 +86,18 @@ def analyze_pdf(pdf_path: Path, ocr_threshold: int = 200, allow_ocr: bool = Fals
         
         # Step 2: OCR fallback if conditions are met
         if allow_ocr and needs_ocr:
-            logging.debug(f"OCR条件満了: text_length={length} < threshold={ocr_threshold}, OCR実行中...")
+            logging.debug(f"OCR条件満了: text_length={length} < threshold={actual_threshold}, OCR実行中...")
             
             try:
                 from .ocr import try_ocr_extraction
                 
                 # OCR実行（embedded textをfallbackとして渡す）
-                ocr_result = try_ocr_extraction(pdf_path, fallback_text=text.strip())
+                ocr_result = try_ocr_extraction(pdf_path, fallback_text=text.strip(), ocr_config=config)
                 
                 if ocr_result.text != text.strip():  # OCRで新しいテキストが取得された
                     text = ocr_result.text
                     length = len(text)
-                    needs_ocr = length < ocr_threshold  # OCR後の長さで再判定
+                    needs_ocr = length < actual_threshold  # OCR後の長さで再判定
                     note = ocr_result.note
                     logging.info(f"OCR処理完了: {pdf_path.name} -> {length}文字 ({note})")
                 else:

@@ -23,20 +23,21 @@ def find_pdfs(path: Path, max_files: int | None = None) -> List[Path]:
         raise FileNotFoundError(f"Path not found or not a PDF: {path}")
     return candidates[:max_files] if max_files else candidates
 
-def _process_single_pdf(pdf_path: Path, allow_ocr: bool = False) -> tuple[ProcessResult, dict]:
+def _process_single_pdf(pdf_path: Path, allow_ocr: bool = False, ocr_config: Optional[dict] = None) -> tuple[ProcessResult, dict]:
     """
     単一PDFファイルを処理する
     
     Args:
         pdf_path: 処理対象PDFファイル
         allow_ocr: OCR機能を有効にするか（デフォルト: False）
+        ocr_config: OCR設定辞書（オプション）
     
     Returns:
         (ProcessResult, info_dict) のタプル
     """
     try:
         LOG.debug("Processing: %s (OCR: %s)", pdf_path, "enabled" if allow_ocr else "disabled")
-        ar = analyze_pdf(pdf_path, allow_ocr=allow_ocr)
+        ar = analyze_pdf(pdf_path, allow_ocr=allow_ocr, ocr_config=ocr_config or {})
         info = parse_info(ar.text)
         
         # 新しいファイル名を生成
@@ -119,7 +120,13 @@ def cmd_dry_run(args: argparse.Namespace) -> int:
     
     # 各PDFを処理
     for p in pdfs:
-        result, info_dict = _process_single_pdf(p, allow_ocr=args.ocr)
+        ocr_config = {
+            'dpi': getattr(args, 'ocr_dpi', 300),
+            'pages': getattr(args, 'ocr_pages', 0),
+            'threshold': getattr(args, 'ocr_threshold', 200),
+            'lang': getattr(args, 'ocr_lang', 'jpn+jpn_vert')
+        }
+        result, info_dict = _process_single_pdf(p, allow_ocr=args.ocr, ocr_config=ocr_config)
         rows.append(result)
         
         # 統計更新
@@ -242,7 +249,13 @@ def cmd_apply(args: argparse.Namespace) -> int:
         
         try:
             # PDF解析・情報抽出
-            result, info_dict = _process_single_pdf(p, allow_ocr=args.ocr)
+            ocr_config = {
+                'dpi': getattr(args, 'ocr_dpi', 300),
+                'pages': getattr(args, 'ocr_pages', 0),
+                'threshold': getattr(args, 'ocr_threshold', 200),
+                'lang': getattr(args, 'ocr_lang', 'jpn+jpn_vert')
+            }
+            result, info_dict = _process_single_pdf(p, allow_ocr=args.ocr, ocr_config=ocr_config)
             
             if result.status == "ERROR":
                 stats["errors"] += 1
@@ -407,6 +420,10 @@ def build_parser() -> argparse.ArgumentParser:
     p.add_argument("--max-files", type=int, help="Limit number of PDFs to process")
     p.add_argument("--strict", action="store_true", help="Stop at first error (apply mode only)")
     p.add_argument("--ocr", action="store_true", help="Enable OCR fallback when text is scarce (requires tesseract)")
+    p.add_argument("--ocr-dpi", type=int, default=300, help="OCR image DPI resolution (default: 300)")
+    p.add_argument("--ocr-pages", type=int, default=0, help="OCR first N pages only, 0=all pages (default: 0)")
+    p.add_argument("--ocr-threshold", type=int, default=200, help="OCR trigger threshold in characters (default: 200)")
+    p.add_argument("--ocr-lang", type=str, default='jpn+jpn_vert', help="OCR tesseract language code (default: jpn+jpn_vert)")
     p.add_argument("--debug", action="store_true", help="Enable debug logs")
     p.add_argument("--logfile", help="Log file path")
     return p

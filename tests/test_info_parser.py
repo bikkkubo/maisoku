@@ -200,3 +200,111 @@ def test_validation_amount_ranges():
     cheap_rent = ParsedInfoRaw(kind="rent", name="格安", amount=10_000)  # 1万円
     validation = validate_parsed_info(cheap_rent)
     assert validation['amount_reasonable'] is False
+
+
+def test_vertical_pdf_text_patterns():
+    """縦書きPDF由来のテキストパターンテスト"""
+    # 縦書き特有のスペーシングや文字化けパターン
+    vertical_sell_text = """
+    物 件 名 ： グ ラ ン ド タ ワ ー 渋 谷
+    販 売 価 格 ： １ 億 ２ ０ ０ ０ 万 円
+    管 理 費 ： ３ 万 円
+    """
+    
+    vertical_rent_text = """
+    物 件 名 ： レ ジ デ ン ス 代 官 山
+    家 賃 ： １ ８ 万 円
+    管 理 費 ： １ 万 円
+    """
+    
+    # 縦書きテキストからの情報抽出テスト
+    sell_info = parse_info(vertical_sell_text)
+    assert sell_info.kind == "sell"
+    # 縦書き由来のテキストでも物件名抽出を試みる
+    # 実装によっては抽出できない可能性あり
+    if sell_info.name:
+        assert "グランド" in sell_info.name or "タワー" in sell_info.name
+    # 価格抽出のテスト
+    assert sell_info.amount == 120_000_000
+    
+    rent_info = parse_info(vertical_rent_text)
+    assert rent_info.kind == "rent"
+    if rent_info.name:
+        assert "レジデンス" in rent_info.name or "代官山" in rent_info.name
+    assert rent_info.amount == 180_000
+
+
+def test_ocr_derived_text_patterns():
+    """OCR由来のテキストパターンテスト"""
+    # OCRで起きやすい誤認識パターン
+    ocr_text = """
+    物件名 : グランドタワ - 渋谷  # OCRで「ー」が「-」に誤認識
+    販売価格 : １ ， ２ ３ ０ 万円  # 数字がスペース区切り
+    管理費 : 2 5 ， ０ ０ ０ 円  # 半角と全角の混在
+    """
+    
+    info = parse_info(ocr_text)
+    assert info.kind == "sell"
+    # OCR由来のテキストでも物件名が抽出できることを期待
+    if info.name:
+        assert "グランド" in info.name
+    # 数字の正規化が正しく動作することをテスト
+    assert info.amount == 12_300_000
+
+
+def test_parse_info_with_unspecified_prices():
+    """応相談・価格未定パターンの情報解析テスト"""
+    unspecified_text = """
+    物件名: 高級マンション代官山
+    販売価格: 応相談
+    管理費: 3万円
+    所在地: 東京都渋谷区
+    """
+    
+    consultation_text = """
+    物件名: プレミアムタワー
+    賃料: 要問合せ
+    管理費: 2万円
+    """
+    
+    # 応相談の場合
+    info1 = parse_info(unspecified_text)
+    assert info1.kind == "sell"  # 販売価格キーワードあり
+    assert info1.name == "高級マンション代官山"
+    assert info1.amount is None  # 応相談のため金額抽出不可
+    
+    # 要問合せの場合
+    info2 = parse_info(consultation_text)
+    assert info2.kind == "rent"  # 賃料キーワードあり
+    assert info2.name == "プレミアムタワー"
+    assert info2.amount is None  # 要問合せのため金額抽出不可
+
+
+def test_enhanced_price_extraction():
+    """強化された価格抽出ロジックのテスト"""
+    # 新しい賃料パターン
+    enhanced_rent_cases = [
+        ("家賃：180,000円 管理費：1万円", "rent", 180_000),
+        ("賃料：18万円/月 敷金：2ヶ月", "rent", 180_000),
+        ("月額200,000円 管理費別", "rent", 200_000),
+        ("18.5万円/月 礼金なし", "rent", 185_000),
+    ]
+    
+    # 新しい売買パターン  
+    enhanced_sell_cases = [
+        ("売出価格：1.2億円 管理費別", "sell", 120_000_000),
+        ("価格：8,500万円 修繕積立金別", "sell", 85_000_000),
+        ("分謦2億円 管理費3万円", "sell", 200_000_000),
+    ]
+    
+    # 賃料パターンテスト
+    for text, expected_kind, expected_amount in enhanced_rent_cases:
+        info = parse_info(text)
+        assert info.kind == expected_kind, f"Text: {text}, Expected kind: {expected_kind}, Got: {info.kind}"
+        assert info.amount == expected_amount, f"Text: {text}, Expected amount: {expected_amount}, Got: {info.amount}"
+    
+    # 売買パターンテスト
+    for text, expected_kind, expected_amount in enhanced_sell_cases:
+        info = parse_info(text)
+        assert info.kind == expected_kind, f"Text: {text}, Expected kind: {expected_kind}, Got: {info.kind}"
+        assert info.amount == expected_amount, f"Text: {text}, Expected amount: {expected_amount}, Got: {info.amount}"

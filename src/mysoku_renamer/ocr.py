@@ -28,11 +28,15 @@ from typing import List, Optional
 try:
     import pytesseract
     from PIL import Image
+    from pdf2image import convert_from_path
     TESSERACT_AVAILABLE = True
+    PDF2IMAGE_AVAILABLE = True
 except ImportError:
     pytesseract = None
     Image = None
+    convert_from_path = None
     TESSERACT_AVAILABLE = False
+    PDF2IMAGE_AVAILABLE = False
 
 
 @dataclass
@@ -55,37 +59,41 @@ def check_tesseract_availability() -> bool:
         return False
 
 
-def _pdf_to_images(pdf_path: Path, dpi: int = 300) -> List["Image.Image"]:
+def _pdf_to_images(pdf_path: Path, dpi: int = 300, pages: int = 0) -> List["Image.Image"]:
     """
     PDF→画像変換
-    
-    注意: 現在は最小実装。PDF→画像変換は環境依存性が高いため、
-    将来は pdf2image + poppler などで拡張予定。
     
     Args:
         pdf_path: PDF ファイルパス
         dpi: 変換解像度
+        pages: 先頭Nページのみ変換（0=全ページ）
         
     Returns:
         画像オブジェクトのリスト
         
     Raises:
-        NotImplementedError: PDF→画像変換が未実装
-        RuntimeError: Pillow が利用不可
+        RuntimeError: pdf2image/Pillow が利用不可、またはPDF変換に失敗
     """
+    if not PDF2IMAGE_AVAILABLE:
+        raise RuntimeError("pdf2image is not available")
+    
     if Image is None:
         raise RuntimeError("Pillow is not available")
     
-    # TODO: 将来実装予定
-    # - pdf2image + poppler による変換
-    # - pypdf による画像抽出（可能な場合）
-    # - 複数ページ対応
-    
-    # 現在は NotImplementedError で明示的に未実装を示す
-    # 呼び出し側で graceful fallback を実施
-    raise NotImplementedError(
-        "PDF→画像変換は将来拡張予定。現在は画像化済みPDFまたは外部前処理が必要です。"
-    )
+    try:
+        images = convert_from_path(str(pdf_path), dpi=dpi)
+        
+        # ページ数制限の適用
+        if pages > 0 and len(images) > pages:
+            images = images[:pages]
+            logging.debug(f"PDF→画像変換成功: {len(images)}ページ（先頭{pages}ページのみ）、DPI={dpi}")
+        else:
+            logging.debug(f"PDF→画像変換成功: {len(images)}ページ、DPI={dpi}")
+        
+        return images
+    except Exception as e:
+        logging.error(f"PDF→画像変換エラー: {e}")
+        raise RuntimeError(f"PDF→画像変換に失敗しました: {e}") from e
 
 
 def run_ocr_on_images(images: List["Image.Image"], lang: str = "jpn+jpn_vert") -> OcrResult:
@@ -137,13 +145,14 @@ def run_ocr_on_images(images: List["Image.Image"], lang: str = "jpn+jpn_vert") -
         return OcrResult(text="", note="ocr_failed")
 
 
-def try_ocr_extraction(pdf_path: Path, fallback_text: str = "") -> OcrResult:
+def try_ocr_extraction(pdf_path: Path, fallback_text: str = "", ocr_config: Optional[dict] = None) -> OcrResult:
     """
     PDFファイルに対してOCR抽出を試行
     
     Args:
         pdf_path: 対象PDFファイル
         fallback_text: OCR失敗時のフォールバックテキスト
+        ocr_config: OCR設定辞書（dpi, pages, lang等）
         
     Returns:
         OcrResult: OCR結果（失敗時はfallback_textを含む）
@@ -155,12 +164,18 @@ def try_ocr_extraction(pdf_path: Path, fallback_text: str = "") -> OcrResult:
         return OcrResult(text=fallback_text, note="ocr_unavailable")
     
     try:
+        # OCR設定の取得
+        config = ocr_config or {}
+        dpi = config.get('dpi', 300)
+        pages = config.get('pages', 0)
+        lang = config.get('lang', 'jpn+jpn_vert')
+        
         # PDF→画像変換を試行
         logging.debug(f"PDF→画像変換開始: {pdf_path}")
-        images = _pdf_to_images(pdf_path)
+        images = _pdf_to_images(pdf_path, dpi=dpi, pages=pages)
         
         # OCR実行
-        ocr_result = run_ocr_on_images(images)
+        ocr_result = run_ocr_on_images(images, lang=lang)
         
         # OCR結果とfallback_textを結合
         if ocr_result.text and ocr_result.note == "ocr_ok":
@@ -170,9 +185,9 @@ def try_ocr_extraction(pdf_path: Path, fallback_text: str = "") -> OcrResult:
             # OCR失敗時はfallback_textのみ
             return OcrResult(text=fallback_text, note=ocr_result.note)
             
-    except NotImplementedError:
-        logging.info("PDF→画像変換が未実装のため、OCRをスキップします")
-        return OcrResult(text=fallback_text, note="ocr_not_implemented_pdf2img")
+    except RuntimeError as e:
+        logging.error(f"PDF→画像変換失敗: {e}")
+        return OcrResult(text=fallback_text, note="ocr_failed")
     except Exception as e:
         logging.error(f"OCR抽出エラー: {e}")
         return OcrResult(text=fallback_text, note="ocr_failed")
@@ -184,7 +199,7 @@ def get_ocr_status_summary() -> dict:
         "tesseract_available": TESSERACT_AVAILABLE and check_tesseract_availability(),
         "pytesseract_installed": pytesseract is not None,
         "pillow_installed": Image is not None,
-        "pdf2img_implemented": False  # 現在未実装
+        "pdf2img_available": PDF2IMAGE_AVAILABLE
     }
 
 
@@ -198,12 +213,12 @@ if __name__ == "__main__":
     status = get_ocr_status_summary()
     print(json.dumps(status, indent=2, ensure_ascii=False))
     
-    if status["tesseract_available"]:
+    if status["tesseract_available"] and status["pdf2img_available"]:
         print("✅ OCR機能は利用可能です")
     else:
         print("❌ OCR機能は利用できません")
         print("システムレベル要件:")
-        print("  - macOS: brew install tesseract tesseract-lang")
-        print("  - Ubuntu: sudo apt-get install tesseract-ocr tesseract-ocr-jpn tesseract-ocr-jpn-vert")
+        print("  - macOS: brew install poppler tesseract tesseract-lang")
+        print("  - Ubuntu: sudo apt-get install -y poppler-utils tesseract-ocr tesseract-ocr-jpn tesseract-ocr-jpn-vert")
         print("Python要件:")
         print("  - pip install \".[ocr]\"")

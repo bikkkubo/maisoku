@@ -35,15 +35,12 @@ class TestOCRAvailability:
             "tesseract_available", 
             "pytesseract_installed", 
             "pillow_installed",
-            "pdf2img_implemented"
+            "pdf2img_available"
         ]
         
         for key in required_keys:
             assert key in status
             assert isinstance(status[key], bool)
-        
-        # PDF2IMG未実装は現在False固定
-        assert status["pdf2img_implemented"] is False
     
     def test_tesseract_availability_check(self):
         """tesseract利用可能性チェック"""
@@ -171,7 +168,6 @@ class TestPDFProcessorOCRIntegration:
                 "ocr_ok",
                 "ocr_unavailable", 
                 "ocr_failed", 
-                "ocr_not_implemented_pdf2img",
                 "no_text_extracted",  # OCR未実行時もあり得る
                 "short_text_",        # OCR未実行時
             ]
@@ -232,6 +228,82 @@ class TestPDFProcessorOCRIntegration:
                 assert isinstance(result.text_length, int)
 
 
+class TestPdf2ImageIntegration:
+    """pdf2image統合テスト"""
+    
+    def test_pdf_to_images_with_pdf2image_available(self):
+        """pdf2image利用可能時のPDF→画像変換テスト"""
+        try:
+            from src.mysoku_renamer.ocr import _pdf_to_images, PDF2IMAGE_AVAILABLE
+            
+            if not PDF2IMAGE_AVAILABLE:
+                pytest.skip("pdf2image not available in this environment")
+            
+            with tempfile.TemporaryDirectory() as temp_dir:
+                temp_path = Path(temp_dir)
+                
+                # 簡単な1ページPDFを作成
+                from pypdf import PdfWriter
+                pdf_path = temp_path / "test.pdf"
+                writer = PdfWriter()
+                writer.add_blank_page(width=595, height=842)
+                with open(pdf_path, 'wb') as f:
+                    writer.write(f)
+                
+                # PDF→画像変換実行
+                images = _pdf_to_images(pdf_path, dpi=150)
+                
+                # 変換結果検証
+                assert len(images) == 1  # 1ページのPDFなので1つの画像
+                assert hasattr(images[0], 'size')  # PIL.Imageの属性
+                assert images[0].size[0] > 0 and images[0].size[1] > 0  # サイズが正の値
+                
+        except ImportError:
+            pytest.skip("Required dependencies not available")
+    
+    def test_ocr_with_pdf2image_end_to_end(self):
+        """pdf2image + OCRのエンドツーエンドテスト"""
+        try:
+            from src.mysoku_renamer.ocr import (
+                try_ocr_extraction, 
+                PDF2IMAGE_AVAILABLE, 
+                TESSERACT_AVAILABLE,
+                check_tesseract_availability
+            )
+            
+            if not PDF2IMAGE_AVAILABLE:
+                pytest.skip("pdf2image not available")
+            
+            with tempfile.TemporaryDirectory() as temp_dir:
+                temp_path = Path(temp_dir)
+                
+                # テストPDF作成
+                from pypdf import PdfWriter
+                pdf_path = temp_path / "test.pdf"
+                writer = PdfWriter()
+                writer.add_blank_page(width=595, height=842)
+                with open(pdf_path, 'wb') as f:
+                    writer.write(f)
+                
+                # OCR抽出試行
+                result = try_ocr_extraction(pdf_path, fallback_text="test_fallback")
+                
+                # 結果検証
+                assert isinstance(result.text, str)
+                assert result.note in ["ocr_ok", "ocr_unavailable", "ocr_failed"]
+                
+                if TESSERACT_AVAILABLE and check_tesseract_availability():
+                    # tesseractが利用可能な場合、OCRが実行されるか失敗するかのどちらか
+                    assert result.note in ["ocr_ok", "ocr_failed"]
+                else:
+                    # tesseract利用不可の場合
+                    assert result.note == "ocr_unavailable"
+                    assert result.text == "test_fallback"
+                    
+        except ImportError:
+            pytest.skip("Required dependencies not available")
+
+
 class TestOCREdgeCases:
     """OCR機能のエッジケーステスト"""
     
@@ -251,14 +323,15 @@ class TestOCREdgeCases:
             # OCR抽出試行（PDF→画像変換は未実装）
             result = try_ocr_extraction(pdf_path, fallback_text="fallback")
             
-            # 未実装エラーが適切に処理されることを確認
+            # OCR処理結果を確認
             expected_notes = [
-                "ocr_not_implemented_pdf2img", 
+                "ocr_ok",
                 "ocr_unavailable",
                 "ocr_failed"
             ]
             assert any(note in result.note for note in expected_notes)
-            assert result.text == "fallback"  # フォールバックテキストが使用される
+            # フォールバックテキストが含まれていることを確認
+            assert "fallback" in result.text
     
     @patch('src.mysoku_renamer.ocr.TESSERACT_AVAILABLE', False)
     def test_try_ocr_extraction_unavailable(self):

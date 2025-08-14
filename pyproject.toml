@@ -24,6 +24,11 @@ dev = [
   "ruff>=0.1.0",
   "mypy>=1.0.0"
 ]
+ocr = [
+  "pytesseract>=0.3.10",
+  "Pillow>=10.4.0",
+  "pdf2image>=1.17.0"
+]
 
 [project.scripts]
 mysoku-rename = "mysoku_renamer.cli:main"
