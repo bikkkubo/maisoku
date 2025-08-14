@@ -1,0 +1,29 @@
+path	status	kind	name	amount	text_length	new_name	notes
+/Users/okb/Downloads/mysoku-renamer/input_pdfs/(仮称)th上原　1F.pdf	OK	rent	と現況が異なる場合、現況を優先いたします	True	708	【賃貸】と現況が異なる場合、現況を優先いたします_家賃1円.pdf	embedded_text_708chars
+/Users/okb/Downloads/mysoku-renamer/input_pdfs/100130895591.pdf	OK	rent	火災保険料 ーー ママ 人 直角有二川	True	1564	【賃貸】火災保険料 ーー ママ 人 直角有二川_家賃1円.pdf	ocr_ok
+/Users/okb/Downloads/mysoku-renamer/input_pdfs/100132264390.pdf	OK	rent	@※ 種 店舗・事務所 (軽飲食相談可)		2680	【賃貸】@※ 種 店舗・事務所 (軽飲食相談可)_家賃未取得.pdf	ocr_ok
+/Users/okb/Downloads/mysoku-renamer/input_pdfs/100133412352.pdf	OK	unknown	※ と現況が異なる場合は現況を優先とします。	39210	2307	【その他】※ と現況が異なる場合は現況を優先とします。_未確定.pdf	ocr_ok
+/Users/okb/Downloads/mysoku-renamer/input_pdfs/100134498990.pdf	OK	rent	上 住居表示 ・ ・	9800000	3003	【賃貸】上 住居表示 ・ ・_家賃9,800,000円.pdf	ocr_ok
+/Users/okb/Downloads/mysoku-renamer/input_pdfs/100134520642.pdf	OK	rent	※サブリース契約の解除はできません。	4000000	1288	【賃貸】※サブリース契約の解除はできません。_家賃4,000,000円.pdf	embedded_text_1288chars
+/Users/okb/Downloads/mysoku-renamer/input_pdfs/100134698827.pdf	OK	rent	※万一 済みの場合はご了承ください。		3201	【賃貸】※万一 済みの場合はご了承ください。_家賃未取得.pdf	ocr_ok
+/Users/okb/Downloads/mysoku-renamer/input_pdfs/100134781765.pdf	OK	rent	支渋谷駅徒歩5分の好立地 ! 東京都渋谷区渋谷3ー1ー15		974	【賃貸】支渋谷駅徒歩5分の好立地 ! 東京都渋谷区渋谷3ー1ー15_家賃未取得.pdf	ocr_ok
+/Users/okb/Downloads/mysoku-renamer/input_pdfs/100134823272.pdf	OK	rent	グランデュオ都立大学3		4163	【賃貸】グランデュオ都立大学3_家賃未取得.pdf	ocr_ok
+/Users/okb/Downloads/mysoku-renamer/input_pdfs/100135120586.pdf	OK	rent	で ・ 短・%a の 南青山3	696960	3756	【賃貸】で ・ 短・%a の 南青山3_家賃696,960円.pdf	ocr_ok
+/Users/okb/Downloads/mysoku-renamer/input_pdfs/100135147907.pdf	OK	sell	※ と異なる場合は現況を優先となります。	135300	1837	【売買】※ と異なる場合は現況を優先となります。_13万円.pdf	ocr_ok
+/Users/okb/Downloads/mysoku-renamer/input_pdfs/100135402368.pdf	OK	rent	ここ サンクタスガーデン太		2275	【賃貸】ここ サンクタスガーデン太_家賃未取得.pdf	ocr_ok
+/Users/okb/Downloads/mysoku-renamer/input_pdfs/5103661786XX (1).pdf	OK	rent	※記載の条件は予告なく変更する場合があります。	True	2988	【賃貸】※記載の条件は予告なく変更する場合があります。_家賃1円.pdf	ocr_ok
+/Users/okb/Downloads/mysoku-renamer/input_pdfs/5103661786XX.pdf	OK	rent	※記載の条件は予告なく変更する場合があります。	True	2988	【賃貸】※記載の条件は予告なく変更する場合があります。_家賃1円.pdf	ocr_ok
+/Users/okb/Downloads/mysoku-renamer/input_pdfs/5103697127XX.pdf	OK	rent	ヒューマックス恵比寿ビル	2025101	1695	【賃貸】ヒューマックス恵比寿ビル_家賃2,025,101円.pdf	ocr_ok
+/Users/okb/Downloads/mysoku-renamer/input_pdfs/6983519187XX.pdf	OK	rent	TIATgA 新築テナント募集中 1	20000	953	【賃貸】TIATgA 新築テナント募集中 1_家賃20,000円.pdf	ocr_ok
+/Users/okb/Downloads/mysoku-renamer/input_pdfs/6986138767XX (1).pdf	OK	rent	株式会社高木商事	900000	1114	【賃貸】株式会社高木商事_家賃900,000円.pdf	ocr_ok
+/Users/okb/Downloads/mysoku-renamer/input_pdfs/6986138767XX.pdf	OK	rent	株式会社高木商事	900000	1114	【賃貸】株式会社高木商事_家賃900,000円.pdf	ocr_ok
+/Users/okb/Downloads/mysoku-renamer/input_pdfs/C48254L29___.pdf	OK	rent	・このハウジングマップは概要紹介図です。 と現況が異なる場合は現況優先となります。地図等の再複製、再頒布はできません。	4800000	3097	【賃貸】・このハウジングマップは概要紹介図です。 と現況が異なる場合は現況優先となります。地図等の再複製、再頒布はできません。_家賃4,800,	ocr_ok
+/Users/okb/Downloads/mysoku-renamer/input_pdfs/PH三軒茶屋西401.pdf	OK	rent	洋室、リビングダイニングキッチン、バス・トイレ別	29500000	601	【賃貸】洋室、リビングダイニングキッチン、バス・トイレ別_家賃29,500,000円.pdf	embedded_text_601chars
+/Users/okb/Downloads/mysoku-renamer/input_pdfs/QR販売図面　ステージグランデ千歳烏山.pdf	OK	rent			2731	【その他】QR販売図面 ステージグランデ千歳烏山_未確定.pdf	embedded_text_2731chars
+/Users/okb/Downloads/mysoku-renamer/input_pdfs/ck103事務所.pdf	OK	rent	凛 美築タイル張 六 オートロック		972	【賃貸】凛 美築タイル張 六 オートロック_家賃未取得.pdf	ocr_ok
+/Users/okb/Downloads/mysoku-renamer/input_pdfs/クレッセント目黒Ⅱ　図面.pdf	OK	rent	■玄関フロアタイル・水回りフロアタイル 張替	9800000	1546	【賃貸】■玄関フロアタイル・水回りフロアタイル 張替_家賃9,800,000円.pdf	embedded_text_1546chars
+/Users/okb/Downloads/mysoku-renamer/input_pdfs/サンクタスガーデン目黒.pdf	OK	rent	文オートロック角宅配ボックスあり	36000	3191	【賃貸】文オートロック角宅配ボックスあり_家賃36,000円.pdf	ocr_ok
+/Users/okb/Downloads/mysoku-renamer/input_pdfs/ヒルメゾンシブヤ402.pdf	OK	rent	交 JR山手線・東横線・井の頭線・銀座線・半感門線	346170711	1689	【賃貸】交 JR山手線・東横線・井の頭線・銀座線・半感門線_家賃346,170,711円.pdf	ocr_ok
+/Users/okb/Downloads/mysoku-renamer/input_pdfs/プレールドゥーク中目黒（値下げ）.pdf	OK	rent	オーナーチェンジ プレール・ドゥーク中目黒	5800000	503	【賃貸】オーナーチェンジ プレール・ドゥーク中目黒_家賃5,800,000円.pdf	embedded_text_503chars
+/Users/okb/Downloads/mysoku-renamer/input_pdfs/レインズ.pdf	OK	rent	渋谷区西原3丁目 貸店舗・事務所	True	1032	【賃貸】渋谷区西原3丁目 貸店舗・事務所_家賃1円.pdf	embedded_text_1032chars
+/Users/okb/Downloads/mysoku-renamer/input_pdfs/募集図面（601） (1).pdf	OK	rent	個性的な隠家店舗（琉球畳と洋デザイン） 業種相談	35000	1057	【賃貸】個性的な隠家店舗（琉球畳と洋デザイン） 業種相談_家賃35,000円.pdf	embedded_text_1057chars

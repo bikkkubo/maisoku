@@ -29,6 +29,11 @@ ocr = [
   "Pillow>=10.4.0",
   "pdf2image>=1.17.0"
 ]
+openai_ocr = [
+  "openai>=1.40.0",
+  "pdf2image>=1.17.0",
+  "Pillow>=10.4.0"
+]
 
 [project.scripts]
 mysoku-rename = "mysoku_renamer.cli:main"

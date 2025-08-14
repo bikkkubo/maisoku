@@ -1,0 +1,6 @@
+path	status	kind	name	amount	text_length	new_name	actual_new_path	timestamp	notes
+/Users/okb/Downloads/mysoku-renamer/input_pdfs/(仮称)th上原　1F.pdf	OK	rent	と現況が異なる場合、現況を優先いたします	450000	708	【賃貸】と現況が異なる場合、現況を優先いたします_家賃450,000円.pdf	/Users/okb/Downloads/mysoku-renamer/renamed_out/【賃貸】と現況が異なる場合、現況を優先いたします_家賃450,000円.pdf	2025-08-13T20:34:08.409040	Applied: copy successful
+/Users/okb/Downloads/mysoku-renamer/input_pdfs/100130895591.pdf	OK	unknown			0	【その他】100130895591_未確定.pdf	/Users/okb/Downloads/mysoku-renamer/renamed_out/【その他】100130895591_未確定.pdf	2025-08-13T20:34:08.409040	Applied: copy successful
+/Users/okb/Downloads/mysoku-renamer/input_pdfs/100132264390.pdf	OK	unknown			0	【その他】100132264390_未確定.pdf	/Users/okb/Downloads/mysoku-renamer/renamed_out/【その他】100132264390_未確定.pdf	2025-08-13T20:34:08.409040	Applied: copy successful
+/Users/okb/Downloads/mysoku-renamer/input_pdfs/100133412352.pdf	OK	unknown			0	【その他】100133412352_未確定.pdf	/Users/okb/Downloads/mysoku-renamer/renamed_out/【その他】100133412352_未確定.pdf	2025-08-13T20:34:08.409040	Applied: copy successful
+/Users/okb/Downloads/mysoku-renamer/input_pdfs/100134498990.pdf	OK	unknown			0	【その他】100134498990_未確定.pdf	/Users/okb/Downloads/mysoku-renamer/renamed_out/【その他】100134498990_未確定.pdf	2025-08-13T20:34:08.409040	Applied: copy successful

@@ -23,7 +23,7 @@ def find_pdfs(path: Path, max_files: int | None = None) -> List[Path]:
         raise FileNotFoundError(f"Path not found or not a PDF: {path}")
     return candidates[:max_files] if max_files else candidates
 
-def _process_single_pdf(pdf_path: Path, allow_ocr: bool = False, ocr_config: Optional[dict] = None) -> tuple[ProcessResult, dict]:
+def _process_single_pdf(pdf_path: Path, allow_ocr: bool = False, ocr_config: Optional[dict] = None, openai_config: Optional[dict] = None) -> tuple[ProcessResult, dict]:
     """
     単一PDFファイルを処理する
     
@@ -31,13 +31,16 @@ def _process_single_pdf(pdf_path: Path, allow_ocr: bool = False, ocr_config: Opt
         pdf_path: 処理対象PDFファイル
         allow_ocr: OCR機能を有効にするか（デフォルト: False）
         ocr_config: OCR設定辞書（オプション）
+        openai_config: OpenAI設定辞書（オプション）
     
     Returns:
         (ProcessResult, info_dict) のタプル
     """
     try:
-        LOG.debug("Processing: %s (OCR: %s)", pdf_path, "enabled" if allow_ocr else "disabled")
-        ar = analyze_pdf(pdf_path, allow_ocr=allow_ocr, ocr_config=ocr_config or {})
+        LOG.debug("Processing: %s (OCR: %s, OpenAI: %s)", 
+                 pdf_path, "enabled" if allow_ocr else "disabled",
+                 "enabled" if openai_config and openai_config.get('enabled') else "disabled")
+        ar = analyze_pdf(pdf_path, allow_ocr=allow_ocr, ocr_config=ocr_config or {}, openai_config=openai_config or {})
         info = parse_info(ar.text)
         
         # 新しいファイル名を生成
@@ -109,6 +112,7 @@ def cmd_dry_run(args: argparse.Namespace) -> int:
         "error_count": 0,
         "ocr_needed_count": 0,
         "ocr_used_count": 0,
+        "openai_used_count": 0,
         "kind_stats": {"sell": 0, "rent": 0, "unknown": 0},
         "name_missing": 0,
         "amount_missing": 0
@@ -126,7 +130,17 @@ def cmd_dry_run(args: argparse.Namespace) -> int:
             'threshold': getattr(args, 'ocr_threshold', 200),
             'lang': getattr(args, 'ocr_lang', 'jpn+jpn_vert')
         }
-        result, info_dict = _process_single_pdf(p, allow_ocr=args.ocr, ocr_config=ocr_config)
+        
+        openai_config = {
+            'enabled': getattr(args, 'openai', False) and getattr(args, 'confirm_cloud', False),
+            'vision': getattr(args, 'openai_vision', False),
+            'model': getattr(args, 'openai_model', 'gpt-4o-mini'),
+            'pages': getattr(args, 'openai_pages', 1),
+            'dpi': getattr(args, 'openai_dpi', 400),
+            'when': getattr(args, 'openai_when', 'missing')
+        }
+        
+        result, info_dict = _process_single_pdf(p, allow_ocr=args.ocr, ocr_config=ocr_config, openai_config=openai_config)
         rows.append(result)
         
         # 統計更新
@@ -139,6 +153,10 @@ def cmd_dry_run(args: argparse.Namespace) -> int:
             # OCR使用統計
             if args.ocr and result.notes and "ocr_ok" in result.notes:
                 stats["ocr_used_count"] += 1
+            
+            # OpenAI使用統計
+            if result.notes and ("openai_vision_ok" in result.notes or "openai_text_ok" in result.notes):
+                stats["openai_used_count"] += 1
             
             kind = info_dict["kind"]
             if kind in stats["kind_stats"]:
@@ -188,7 +206,10 @@ def cmd_dry_run(args: argparse.Namespace) -> int:
     
     # 結果サマリー
     success_count = len(rows) - stats["error_count"]
-    if args.ocr and stats["ocr_used_count"] > 0:
+    if stats["openai_used_count"] > 0:
+        LOG.info("dry-run completed: %d total, %d success, %d errors, %d OpenAI used -> %s", 
+                 len(rows), success_count, stats["error_count"], stats["openai_used_count"], out_tsv)
+    elif args.ocr and stats["ocr_used_count"] > 0:
         LOG.info("dry-run completed: %d total, %d success, %d errors, %d OCR used -> %s", 
                  len(rows), success_count, stats["error_count"], stats["ocr_used_count"], out_tsv)
     else:
@@ -240,7 +261,8 @@ def cmd_apply(args: argparse.Namespace) -> int:
         "success": 0,
         "errors": 0,
         "ocr_needed": 0,
-        "ocr_used": 0
+        "ocr_used": 0,
+        "openai_used": 0
     }
     
     # 各PDFを処理
@@ -255,7 +277,17 @@ def cmd_apply(args: argparse.Namespace) -> int:
                 'threshold': getattr(args, 'ocr_threshold', 200),
                 'lang': getattr(args, 'ocr_lang', 'jpn+jpn_vert')
             }
-            result, info_dict = _process_single_pdf(p, allow_ocr=args.ocr, ocr_config=ocr_config)
+            
+            openai_config = {
+                'enabled': getattr(args, 'openai', False) and getattr(args, 'confirm_cloud', False),
+                'vision': getattr(args, 'openai_vision', False),
+                'model': getattr(args, 'openai_model', 'gpt-4o-mini'),
+                'pages': getattr(args, 'openai_pages', 1),
+                'dpi': getattr(args, 'openai_dpi', 400),
+                'when': getattr(args, 'openai_when', 'missing')
+            }
+            
+            result, info_dict = _process_single_pdf(p, allow_ocr=args.ocr, ocr_config=ocr_config, openai_config=openai_config)
             
             if result.status == "ERROR":
                 stats["errors"] += 1
@@ -271,9 +303,11 @@ def cmd_apply(args: argparse.Namespace) -> int:
             if info_dict["needs_ocr"]:
                 stats["ocr_needed"] += 1
             
-            # OCR使用統計
+            # OCR/OpenAI使用統計
             if args.ocr and result.notes and "ocr_ok" in result.notes:
                 stats["ocr_used"] += 1
+            if result.notes and ("openai_vision_ok" in result.notes or "openai_text_ok" in result.notes):
+                stats["openai_used"] += 1
             
             # ファイル操作実行
             if output_dir:
@@ -391,8 +425,10 @@ def cmd_apply(args: argparse.Namespace) -> int:
     LOG.info("apply completed: %d total, %d success, %d errors -> %s", 
              stats["total"], stats["success"], stats["errors"], apply_path)
     
-    # OCR統計
-    if args.ocr and stats["ocr_used"] > 0:
+    # OCR/OpenAI統計
+    if stats["openai_used"] > 0:
+        LOG.info("OpenAI usage: %d files processed successfully", stats["openai_used"])
+    elif args.ocr and stats["ocr_used"] > 0:
         LOG.info("OCR usage: %d files processed successfully with OCR", stats["ocr_used"])
     elif stats["ocr_needed"] > 0 and not args.ocr:
         LOG.info("OCR candidates: %d files (consider using --ocr in future)", stats["ocr_needed"])
@@ -409,7 +445,7 @@ def cmd_apply(args: argparse.Namespace) -> int:
     return 1 if stats["errors"] > 0 else 0
 
 def build_parser() -> argparse.ArgumentParser:
-    p = argparse.ArgumentParser(prog="mysoku-rename", description="Mysoku PDF renamer with OCR support")
+    p = argparse.ArgumentParser(prog="mysoku-rename", description="Mysoku PDF renamer with OCR and OpenAI support")
     mode = p.add_mutually_exclusive_group(required=True)
     mode.add_argument("--dry-run", action="store_true", help="Preview only (TSV output)")
     mode.add_argument("--apply", action="store_true", help="Rename/copy files with rollback TSV")
@@ -419,11 +455,25 @@ def build_parser() -> argparse.ArgumentParser:
     p.add_argument("--outdir", help="Copy files to this directory (default: rename in same directory)")
     p.add_argument("--max-files", type=int, help="Limit number of PDFs to process")
     p.add_argument("--strict", action="store_true", help="Stop at first error (apply mode only)")
+    
+    # OCR options
     p.add_argument("--ocr", action="store_true", help="Enable OCR fallback when text is scarce (requires tesseract)")
     p.add_argument("--ocr-dpi", type=int, default=300, help="OCR image DPI resolution (default: 300)")
     p.add_argument("--ocr-pages", type=int, default=0, help="OCR first N pages only, 0=all pages (default: 0)")
     p.add_argument("--ocr-threshold", type=int, default=200, help="OCR trigger threshold in characters (default: 200)")
     p.add_argument("--ocr-lang", type=str, default='jpn+jpn_vert', help="OCR tesseract language code (default: jpn+jpn_vert)")
+    
+    # OpenAI options
+    p.add_argument("--openai", action="store_true", help="Enable OpenAI text extraction (requires --confirm-cloud)")
+    p.add_argument("--openai-vision", action="store_true", help="Use OpenAI Vision API for PDF pages (requires --confirm-cloud)")
+    p.add_argument("--openai-model", type=str, default="gpt-4o-mini", help="OpenAI model to use (default: gpt-4o-mini)")
+    p.add_argument("--openai-pages", type=int, default=1, help="Vision API first N pages, 0=all pages (default: 1)")
+    p.add_argument("--openai-dpi", type=int, default=400, help="Vision API image DPI resolution (default: 400)")
+    p.add_argument("--openai-when", choices=["always", "missing"], default="missing", 
+                   help="When to use OpenAI: always or when data missing (default: missing)")
+    p.add_argument("--confirm-cloud", action="store_true", 
+                   help="⚠️  REQUIRED: Explicit consent for cloud data transmission to OpenAI")
+    
     p.add_argument("--debug", action="store_true", help="Enable debug logs")
     p.add_argument("--logfile", help="Log file path")
     return p
@@ -431,6 +481,13 @@ def build_parser() -> argparse.ArgumentParser:
 def main() -> int:
     parser = build_parser()
     args = parser.parse_args()
+    
+    # OpenAI利用時の同意チェック
+    if (args.openai or args.openai_vision) and not args.confirm_cloud:
+        print("❌ Error: OpenAI features require explicit cloud consent.")
+        print("   Add --confirm-cloud flag to acknowledge data transmission to OpenAI.")
+        return 1
+    
     setup_logging(args.debug, args.logfile)
     if args.dry_run:
         return cmd_dry_run(args)

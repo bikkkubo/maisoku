@@ -79,6 +79,54 @@ mysoku-rename --dry-run --ocr ./pdfs --output preview_ocr.tsv
 python -m mysoku_renamer.ocr
 ```
 
+### 5. OpenAI連携機能（オプション）
+
+OpenAI APIを使用した高精度な物件情報抽出機能です。テキスト解析とVision APIの2つのモードに対応しています。
+
+#### 概要
+- **テキストモード（--openai）**: 抽出済みテキストをGPTで構造化解析
+- **ビジョンモード（--openai-vision）**: PDFページ画像をVision APIで直接解析
+- **自動補完**: 既存手法で取得できない情報のみを補完（コスト最適化）
+
+#### セキュリティ・プライバシー
+- **明示的同意必須**: `--confirm-cloud` フラグがないとデータ送信しません
+- **APIキー管理**: 環境変数のみ（コマンドライン指定不可）
+- **送信制御**: `--openai-when missing` で必要時のみ送信（推奨）
+
+#### 前提条件
+```bash
+# 環境変数でOpenAI API Keyを設定
+export OPENAI_API_KEY="sk-xxxx"
+
+# Python依存関係
+pip install -e '.[openai_ocr]'
+```
+
+#### コスト最適化の推奨設定
+- `--openai-when missing`: 情報不足時のみAPI呼び出し（デフォルト）
+- `--openai-pages 1`: Vision使用時は先頭1ページのみ（デフォルト）
+- `--openai-model gpt-4o-mini`: 最も安価なモデル（デフォルト）
+
+#### 使用例
+
+**テキストモード（抽出済みテキストの構造化）:**
+```bash
+export OPENAI_API_KEY=sk-xxxx
+mysoku-rename --dry-run ./input_pdfs --openai --openai-when missing --confirm-cloud --debug --output preview_ai.tsv
+```
+
+**ビジョンモード（画像ベースPDF対応）:**
+```bash
+export OPENAI_API_KEY=sk-xxxx
+mysoku-rename --dry-run ./input_pdfs --openai --openai-vision --openai-pages 1 --openai-dpi 400 --openai-when always --confirm-cloud --debug --output preview_ai_vision.tsv
+```
+
+**OCR + OpenAI連携（最大精度）:**
+```bash
+export OPENAI_API_KEY=sk-xxxx
+mysoku-rename --dry-run ./input_pdfs --ocr --openai --openai-vision --openai-when missing --confirm-cloud --debug --output preview_hybrid.tsv
+```
+
 ## 使い方
 
 ### ⚠️ 重要: 安全運用の手順

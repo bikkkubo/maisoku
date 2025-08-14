@@ -1,0 +1,4 @@
+path	status	kind	name	amount	text_length	new_name	notes
+/Users/okb/Downloads/mysoku-renamer/input_pdfs/(仮称)th上原　1F.pdf	OK	rent	と現況が異なる場合、現況を優先いたします	450000	708	【賃貸】と現況が異なる場合、現況を優先いたします_家賃450,000円.pdf	embedded_text_708chars
+/Users/okb/Downloads/mysoku-renamer/input_pdfs/100130895591.pdf	OK	rent	火災保険料 ーー ママ 人 直角有二川		1564	【賃貸】火災保険料 ーー ママ 人 直角有二川_家賃未取得.pdf	ocr_ok
+/Users/okb/Downloads/mysoku-renamer/input_pdfs/100132264390.pdf	OK	rent	@※ 種 店舗・事務所 (軽飲食相談可)		2680	【賃貸】@※ 種 店舗・事務所 (軽飲食相談可)_家賃未取得.pdf	ocr_ok

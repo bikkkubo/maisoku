@@ -1,0 +1,29 @@
+path	status	kind	name	amount	text_length	new_name	notes
+/Users/okb/Downloads/mysoku-renamer/input_pdfs/(仮称)th上原　1F.pdf	OK	rent	と現況が異なる場合、現況を優先いたします	True	708	【賃貸】と現況が異なる場合、現況を優先いたします_家賃1円.pdf	embedded_text_708chars
+/Users/okb/Downloads/mysoku-renamer/input_pdfs/100130895591.pdf	OK	rent	- +こごこり	True	2191	【賃貸】- +こごこり_家賃1円.pdf	ocr_ok
+/Users/okb/Downloads/mysoku-renamer/input_pdfs/100132264390.pdf	OK	rent	@※ポ 種 ・店舗・事務所 (軽飲食相談可)		2669	【賃貸】@※ポ 種 ・店舗・事務所 (軽飲食相談可)_家賃未取得.pdf	ocr_ok
+/Users/okb/Downloads/mysoku-renamer/input_pdfs/100133412352.pdf	OK	sell	学校や保育還も人内に多数あり ・	15200	1171	【売買】学校や保育還も人内に多数あり ・_1万円.pdf	ocr_ok
+/Users/okb/Downloads/mysoku-renamer/input_pdfs/100134498990.pdf	OK	sell	住居表示 エー 、	20250613	3307	【売買】住居表示 エー 、_2,025万円.pdf	ocr_ok
+/Users/okb/Downloads/mysoku-renamer/input_pdfs/100134520642.pdf	OK	rent	※サブリース契約の解除はできません。	4000000	1288	【賃貸】※サブリース契約の解除はできません。_家賃4,000,000円.pdf	embedded_text_1288chars
+/Users/okb/Downloads/mysoku-renamer/input_pdfs/100134698827.pdf	OK	rent	※万一 済みの場合はご了承ください。		2821	【賃貸】※万一 済みの場合はご了承ください。_家賃未取得.pdf	ocr_ok
+/Users/okb/Downloads/mysoku-renamer/input_pdfs/100134781765.pdf	OK	rent	免保証会社利用必須(上場企業等は相談可〕		1035	【賃貸】免保証会社利用必須(上場企業等は相談可〕_家賃未取得.pdf	ocr_ok
+/Users/okb/Downloads/mysoku-renamer/input_pdfs/100134823272.pdf	OK	rent	グランデュオ都立大学 3		3687	【賃貸】グランデュオ都立大学 3_家賃未取得.pdf	ocr_ok
+/Users/okb/Downloads/mysoku-renamer/input_pdfs/100135120586.pdf	OK	rent	【定休日】 土・日・祝日 ⑰ ・広告有効期限・		3314	【賃貸】【定休日】 土・日・祝日 ⑰ ・広告有効期限・_家賃未取得.pdf	ocr_ok
+/Users/okb/Downloads/mysoku-renamer/input_pdfs/100135147907.pdf	OK	sell	※ と異なる場合は現況を優先となります。	135300	1851	【売買】※ と異なる場合は現況を優先となります。_13万円.pdf	ocr_ok
+/Users/okb/Downloads/mysoku-renamer/input_pdfs/100135402368.pdf	OK	rent	LANDNBET ウンルームー	27800000	2155	【賃貸】LANDNBET ウンルームー_家賃27,800,000円.pdf	ocr_ok
+/Users/okb/Downloads/mysoku-renamer/input_pdfs/5103661786XX (1).pdf	OK	rent	※記載の条件は予告なく変更する場合があります。	True	2643	【賃貸】※記載の条件は予告なく変更する場合があります。_家賃1円.pdf	ocr_ok
+/Users/okb/Downloads/mysoku-renamer/input_pdfs/5103661786XX.pdf	OK	rent	※記載の条件は予告なく変更する場合があります。	True	2643	【賃貸】※記載の条件は予告なく変更する場合があります。_家賃1円.pdf	ocr_ok
+/Users/okb/Downloads/mysoku-renamer/input_pdfs/5103697127XX.pdf	OK	unknown	長井・秋山	549500	1488	【その他】長井・秋山_未確定.pdf	ocr_ok
+/Users/okb/Downloads/mysoku-renamer/input_pdfs/6983519187XX.pdf	OK	rent	営業時間・10時一18時 手数料・客付け100%	20000	1026	【賃貸】営業時間・10時一18時 手数料・客付け100%_家賃20,000円.pdf	ocr_ok
+/Users/okb/Downloads/mysoku-renamer/input_pdfs/6986138767XX (1).pdf	OK	rent	株式会社高木商事	10000	1304	【賃貸】株式会社高木商事_家賃10,000円.pdf	ocr_ok
+/Users/okb/Downloads/mysoku-renamer/input_pdfs/6986138767XX.pdf	OK	rent	株式会社高木商事	10000	1304	【賃貸】株式会社高木商事_家賃10,000円.pdf	ocr_ok
+/Users/okb/Downloads/mysoku-renamer/input_pdfs/C48254L29___.pdf	OK	sell	7oet有ミミ 用 ーー 現 況 居住中	4600000	3710	【売買】7oet有ミミ 用 ーー 現 況 居住中_460万円.pdf	ocr_ok
+/Users/okb/Downloads/mysoku-renamer/input_pdfs/PH三軒茶屋西401.pdf	OK	rent	洋室、リビングダイニングキッチン、バス・トイレ別	29500000	601	【賃貸】洋室、リビングダイニングキッチン、バス・トイレ別_家賃29,500,000円.pdf	embedded_text_601chars
+/Users/okb/Downloads/mysoku-renamer/input_pdfs/QR販売図面　ステージグランデ千歳烏山.pdf	OK	rent			2731	【その他】QR販売図面 ステージグランデ千歳烏山_未確定.pdf	embedded_text_2731chars
+/Users/okb/Downloads/mysoku-renamer/input_pdfs/ck103事務所.pdf	OK	rent	廊 美築タイル 六 オートロック		908	【賃貸】廊 美築タイル 六 オートロック_家賃未取得.pdf	ocr_ok
+/Users/okb/Downloads/mysoku-renamer/input_pdfs/クレッセント目黒Ⅱ　図面.pdf	OK	rent	■玄関フロアタイル・水回りフロアタイル 張替	9800000	1546	【賃貸】■玄関フロアタイル・水回りフロアタイル 張替_家賃9,800,000円.pdf	embedded_text_1546chars
+/Users/okb/Downloads/mysoku-renamer/input_pdfs/サンクタスガーデン目黒.pdf	OK	rent	文山手線「目黒」駅・東急東横線「中目黒」駅 徒歩圏内	36000	3403	【賃貸】文山手線「目黒」駅・東急東横線「中目黒」駅 徒歩圏内_家賃36,000円.pdf	ocr_ok
+/Users/okb/Downloads/mysoku-renamer/input_pdfs/ヒルメゾンシブヤ402.pdf	OK	rent	交 JR山手線・東横線・井の頭線・銀卒線・半蔵門線		1947	【賃貸】交 JR山手線・東横線・井の頭線・銀卒線・半蔵門線_家賃未取得.pdf	ocr_ok
+/Users/okb/Downloads/mysoku-renamer/input_pdfs/プレールドゥーク中目黒（値下げ）.pdf	OK	rent	オーナーチェンジ プレール・ドゥーク中目黒	5800000	503	【賃貸】オーナーチェンジ プレール・ドゥーク中目黒_家賃5,800,000円.pdf	embedded_text_503chars
+/Users/okb/Downloads/mysoku-renamer/input_pdfs/レインズ.pdf	OK	rent	渋谷区西原3丁目 貸店舗・事務所	True	1032	【賃貸】渋谷区西原3丁目 貸店舗・事務所_家賃1円.pdf	embedded_text_1032chars
+/Users/okb/Downloads/mysoku-renamer/input_pdfs/募集図面（601） (1).pdf	OK	rent	個性的な隠家店舗（琉球畳と洋デザイン） 業種相談	35000	1057	【賃貸】個性的な隠家店舗（琉球畳と洋デザイン） 業種相談_家賃35,000円.pdf	embedded_text_1057chars
